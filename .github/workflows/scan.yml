@@ -1,0 +1,31 @@
+# Generated from a private repo; the private token list never comes here, so this
+# job runs only the generic checks: secrets (gitleaks, full history) plus email
+# addresses and phone numbers in the current tree.
+name: scan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: gitleaks (full history)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: email addresses and phone numbers
+        run: |
+          set +e
+          emails=$(grep -rnoE --exclude-dir=.git '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' . \
+            | grep -vE '@(anthropic\.com|example\.(com|org))$')
+          phones=$(grep -rnoE --exclude-dir=.git '(^|[^0-9])\(?[0-9]{3}\)?[-. ][0-9]{3}[-. ][0-9]{4}([^0-9]|$)' .)
+          [ -n "$emails" ] && echo "Email addresses found:" && echo "$emails"
+          [ -n "$phones" ] && echo "Phone numbers found:" && echo "$phones"
+          [ -z "$emails$phones" ]

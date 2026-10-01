@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "voice-loop",
+  "version": "0.1.0",
+  "description": "Export drafts to clean paste-ready files, then log how you revised them so Claude learns your voice from your own edits",
+  "author": {
+    "name": "David Shope",
+    "url": "https://github.com/dshope11"
+  }
+}
