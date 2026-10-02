@@ -2,26 +2,27 @@
 
 This is an excerpt of `~/.claude/CLAUDE.md`, which loads into every Claude Code session I run, in
 every repo. The full file is about 350 lines and private. Below is its outline, then four of its
-rules, quoted with names and dates removed, each followed by the incident behind it.
+rules, shortened and with names and dates removed, each followed by the incident behind it.
 
-Most of the file wasn't planned. Sections get added after something goes wrong, and each one
-carries a short note on what happened, so a later reader (me or the model) can judge whether the
-rule still applies.
+Much of the file wasn't planned. The longer rules each came out of something going wrong and
+note what happened, so a later reader (me or the model) can judge whether a rule still applies.
 
 ## Outline
 
 | Section | What it holds |
 |---|---|
 | Who I Am | Background, current level, target roles, so the model calibrates explanations instead of guessing |
-| How to Work with Me | Don't over-explain basics, push back on completionism, be concise, suggest a higher effort level before high-stakes drafting |
+| How to Work with Me | Skip the basics, use industry framing, don't overstate my ML depth, push back on completionism, be concise, and suggest a higher effort level before high-stakes work |
 | Hardware | The laptop runs PyTorch on MPS, not CUDA, so CUDA-only ops get flagged |
 | Git Behavior | Ask before every commit |
+| Programming Environment | Languages and tooling |
 | Character Encoding Conventions | ASCII only in source code, LaTeX math in rendered READMEs, and a table of replacements |
 | Spelling: US English, always | Below |
-| Text Suggestions for Human Typing | Anything I'll paste uses keyboard characters only, with one line per paragraph |
+| Text Suggestions for Human Typing or Sending | Anything I'll paste uses keyboard characters only, with one line per paragraph |
 | Voice rules | Five rules for prose I send as myself, each learned from a draft I revised (see the `voice-loop` plugin) |
 | Email Access | A read-only mail CLI, and a standing rule never to send on my behalf |
 | File edits | Below |
+| Claude Code config | Skills, hooks, settings and this file live in a private repo installed by symlinks; this public repo is exported from it |
 | Claude Code paths | Personal file locations that published skills look up by key |
 | Name the thing, don't refer to it | Below |
 | Working Style Notes | My pull toward closing every loop, and an instruction to push back on it |
@@ -31,9 +32,8 @@ rule still applies.
 
 ### Name the thing, don't refer to it
 
-> **Do not use a definite noun phrase for a decision, rule, correction, or finding that the user
-> could not identify from the current conversation alone.** State the thing instead of labeling
-> it.
+> **Do not use a definite noun phrase for a decision, rule, correction, or finding that I could
+> not identify from the current conversation alone.** State the thing instead of labeling it.
 >
 > **The tell:** a definite article in front of a noun phrase naming a *decision* rather than an
 > object - *the* retired trigger, *the* dated rule, *the* correction, *the* audit finding, *the*
@@ -47,23 +47,24 @@ rule still applies.
 > and worse. The rule is narrow: it applies to referring expressions with no antecedent, not to
 > background generally.
 >
-> **Standing trigger: whenever the user points out a reference they couldn't identify, log it as
-> an instance.** This class can't be self-detected - the sentence looks complete from the writing
-> side, because the writer has the referent - so the user's flag is the only detector there is.
+> **Standing trigger: whenever I point out a reference I couldn't identify, log it as an
+> instance.** This class can't be self-detected - the sentence looks complete from the writing
+> side, because the writer has the referent - so my flag is the only detector there is.
 
-**Why it's there.** A session summary told me "the retired trigger is worth keeping the shape of
-rather than just deleting." Every word was accurate, but the trigger had been set in a different
-session and nothing in this one had introduced it. Two days later a prep briefing was organized
-around question numbers I'd never been shown. The model keeps its working notes in the same place
-it reads its memory from, so after a session of writing there, a term that's precise on the page
-starts acting as if it were shared.
+**Why it's there.** A briefing told me "the retired trigger is worth keeping the shape of rather
+than just deleting." Every word was accurate, but the trigger had been set in a different session
+and nothing in this one had introduced it. It was the first logged instance of something I'd
+noticed repeatedly. The model's notes and its memory live in the same place, so after a session of
+writing there, a term that's precise on the page starts acting as if it were shared. It isn't. I
+haven't read the page; I'm being briefed on it. Two days later, with the rule already in place, a
+prep briefing was organized around question numbers I'd never been shown.
 
 ### File edits: use Edit/Write, never shell redirection
 
 > When changing a file, use the **Edit** or **Write** tools - not `sed -i`, not a heredoc, not a
 > Python script that rewrites the file.
 >
-> - **The diff renders in real time.** A shell command that mutates a file shows the user nothing.
+> - **The diff renders in real time.** A shell command that mutates a file shows me nothing.
 > - **`PreToolUse` hooks only fire on Edit/Write/MultiEdit.** A shell write silently skips any
 >   guardrail hooked there.
 >
@@ -95,13 +96,14 @@ is what made it a rule.
 ### Spelling: US English, always
 
 > Every word written for me is US English: applications, messages, READMEs, code comments,
-> commit messages. **Check before shipping, don't trust the eye:** grep the rendered text for
+> commit messages. A British spelling in a cover letter reads as careless, or as text lifted from
+> somewhere else. **Check before shipping, don't trust the eye:** grep the rendered text for
 > British forms. **Read the rendered prose end to end before declaring a letter done** - page
 > count and a spelling grep don't catch grammar.
 
 **Why it's there.** I spent six years at European universities inside a CERN collaboration that
 writes British English, so my source material uses British spellings, and copying a phrase from
 it carries the spelling along. "Programme" reached a finished, page-verified cover letter, and I
-caught it on my own read. The same read turned up a wrong preposition, a sentence missing its
-complement, and a dropped relative pronoun, which is why the rule asks for a full read and not
-just the grep.
+caught it on my own read; no check in the pipeline did. The same read turned up a wrong
+preposition, a sentence missing its complement, and a dropped relative pronoun. Those three are
+why the rule pairs the grep with a full read.

@@ -14,7 +14,7 @@ Stage all changes in the current repo and commit with a descriptive message.
 
 2. **Sanity-check untracked and modified files before staging anything.** For each file in the status output, flag it if any of the following are true:
    - Size > 1 MB: run `find . -name "<filename>" -size +1M` to confirm
-   - Path looks like a secret or credential: contains words like `secret`, `token`, `key`, `password`, `credential`, `.env`
+   - **Untracked files only** (`??` in the status): path looks like a secret or credential, i.e. contains words like `secret`, `token`, `key`, `password`, `credential`, `.env`. A tracked file was vetted when it was first added, so a modification to it isn't flagged.
    - Path is in a directory that shouldn't be committed: `node_modules/`, `.venv/`, `venv/`, `__pycache__/`, `dist/`, `build/`
 
    If any flags fire, **stop and list the flagged files with a one-line reason each**, then ask: "Proceed with all files, skip the flagged ones, or abort?" Wait for a response before continuing.
