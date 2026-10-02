@@ -62,7 +62,7 @@ Each line reads `## [date] <slug> | <genre> -> <audience>`. From that listing:
 
 - **Read the entries matching this draft's genre first**, then those matching the audience. Use `sed -n '<start>,<end>p'` on the line ranges to pull just those entries.
 - **Read only the `### Edits` and `### Why, in their words` sections.** The verbatim `### Drafted` / `### Sent` blocks are the bulk of the file and exist for the corpus, not for drafting guidance - skip them unless a specific edit is unclear without its context.
-- **If nothing matches on genre or audience, read the three most recent entries anyway.** Several patterns are cross-genre - hedging claims about a third party's process, and the reframing of a self-indictment into a neutral statement, both showed up across every message in the first batch.
+- **If nothing matches on genre or audience, read the three most recent entries anyway.** Several patterns are cross-genre - hedging claims about a third party's process, say, or reframing a self-indictment into a neutral statement.
 - **If the log has no entries yet, skip silently.** Do not mention having looked.
 
 **If the log has a "Promoted voice rules" section, it holds the long form of the rules that have already graduated to the user's CLAUDE.md** - reasoning, worked examples, scope edge cases. CLAUDE.md carries each one compressed to a few lines and is already loaded, so **do not read that section routinely**; read it only when a rule seems to be misfiring or an edge case is genuinely unclear.
