@@ -1,7 +1,7 @@
 # dshope-plugins
 
-Claude Code skills and hooks from my daily setup, published two ways: four installable plugins,
-and a set of worked examples from the larger system they came out of. Many pieces exist because
+Claude Code skills and hooks from my daily setup, published three ways: four installable plugins,
+two copy-in templates, and a set of worked examples from the larger system they came out of. Many pieces exist because
 something went wrong without them, and this README tells four of those stories.
 
 I've used Claude Code since April 2026 to run an Obsidian vault the agent maintains
@@ -25,6 +25,12 @@ reviews), a job search, and a few code projects.
 
 `obsidian-guards` checks every `.md` write, so install it per project, from inside the vault:
 `claude plugin install obsidian-guards@dshope-plugins --scope project`.
+
+Two pieces are copy-in templates instead of plugins:
+[`templates/python-quality-hook/`](templates/python-quality-hook/) carries project-specific
+paths, and [`templates/statusline/`](templates/statusline/) sets `statusLine`, which a plugin
+can't. The status line adds a countdown to when the prompt cache goes cold, next to the context
+bar.
 
 Skills that need a personal file location read it from a `## Claude Code paths` section in
 your `~/.claude/CLAUDE.md`, and fall back to a default when a key is missing:
