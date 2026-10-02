@@ -1,10 +1,11 @@
 # Worked examples
 
 These are skills from my own setup, published as reading material rather than plugins. They
-assume a specific Obsidian vault layout (daily notes, periodic notes, an LLM-maintained wiki) and
-a read-only mail CLI, so they won't run as-is anywhere else. What carries over is the shape: each
-rule exists because something went wrong without it, and most of them are about state the model
-can't see on its own.
+assume a specific Obsidian vault layout (daily notes, periodic notes, an
+[LLM-maintained wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)) and
+a read-only mail CLI, so they won't run as-is anywhere else. What carries over is the shape: many
+rules exist because something went wrong without them, and most of those are about state the
+model can't see on its own.
 
 Vault paths appear as `~/vault`. [`CLAUDE.md`](CLAUDE.md) is an annotated excerpt of the global
 instructions file these skills run under.

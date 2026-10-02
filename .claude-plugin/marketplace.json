@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "dshope-plugins",
-  "description": "Claude Code skills and hooks, each built to prevent a specific failure seen in daily use",
+  "description": "Claude Code skills and hooks from daily use, many built to prevent a specific failure",
   "owner": {
     "name": "David Shope",
     "url": "https://github.com/dshope11"

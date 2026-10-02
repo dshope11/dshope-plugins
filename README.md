@@ -1,11 +1,13 @@
 # dshope-plugins
 
 Claude Code skills and hooks from my daily setup, published two ways: four installable plugins,
-and a set of worked examples from the larger system they came out of. Each piece exists because
-something went wrong without it, and this README tells four of those stories.
+and a set of worked examples from the larger system they came out of. Many pieces exist because
+something went wrong without them, and this README tells four of those stories.
 
 I've used Claude Code since April 2026 to run an Obsidian vault the agent maintains
-(daily notes, a wiki, periodic reviews), a job search, and a few code projects.
+(daily notes, a wiki in the style of
+[Karpathy's LLM wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), periodic
+reviews), a job search, and a few code projects.
 
 ## Install
 
@@ -51,12 +53,10 @@ asked whether anything had been caught. Now my end-of-session skill asks every t
 concrete cues (a claim I corrected, a page edited to fix rather than to add) instead of asking the
 model to introspect, and it puts each candidate to me instead of writing it down.
 
-A related check failed in the other direction. Next to the error log I keep a second one, of what
-my reviews catch in drafts before they ship, and a session logged a "catch" in its own draft that
-I'd never made, because the step said an entry was expected. I retracted it that evening, and the
-step now requires that I made the correction myself. An entry built from the model's
-theory of its own weaknesses is worse than no entry, because nothing on the page marks it as
-different from the real ones.
+The fix can overshoot. A second log records mistakes I catch in drafts before they ship, and
+once a session logged a mistake in its own draft that I never caught, because the step said an
+entry was expected. That step now counts only corrections I made myself. A made-up entry is worse
+than none, because nothing on the page sets it apart from the real ones.
 
 Reading back through the log, many of the failures had something in common: nothing looked
 wrong. Here are four, one from each layer of the setup.
@@ -119,12 +119,13 @@ quotes my reasons word for word, and appends an entry to the log. The next `/dra
 matching entries before it writes anything. The log collected 18 entries in its first three weeks,
 and three of the five voice rules in my `CLAUDE.md` were promoted from it.
 
-The promotion bar needed fixing too. It shipped as "a second instance", and the first batch put
-up a pattern seen twice within an hour, in two near-identical messages to the same kind of
-recipient. That's one observation counted twice, so the bar is now a second *independent*
-instance: a different genre, recipient or day. A drafted and sent pair is also the
-chosen/rejected format that preference tuning uses, though it would take a few hundred pairs
-before that's worth anything.
+A pattern in the log becomes a rule once it shows up a second time. At first, two near-identical
+messages written an hour apart counted as two, but that's one observation counted twice. Now the
+second instance has to be *independent*: a different kind of message, a different recipient, or
+a different day.
+
+Each drafted-and-sent pair is also a chosen/rejected example in the format preference tuning
+uses, though it would take a few hundred pairs before that's worth anything.
 
 [`plugins/voice-loop/`](plugins/voice-loop/)
 
@@ -163,7 +164,7 @@ this repo's original name, and `claude plugin marketplace add` refused it, becau
 reserves that marketplace name.
 
 [`examples/`](examples/) holds the skills that depend on my vault layout. They won't run as-is,
-but each rule in them traces to an incident. [`examples/CLAUDE.md`](examples/CLAUDE.md) is an
+but many of the rules in them trace to an incident. [`examples/CLAUDE.md`](examples/CLAUDE.md) is an
 annotated excerpt of the global instructions file they run under.
 
 ## What I'd do differently
