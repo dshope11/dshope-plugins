@@ -27,7 +27,9 @@ On a Claude subscription, plan usage sits right-aligned on the same line:
   percentages are cyan, then yellow from 75%, red from 90%, the thresholds the usage page uses.
 - The parenthesis after `wk` is pace: how many days of usage you are ahead of (+) or behind (-)
   an even spread across the week, counted from the reset time. Gray at or under pace, yellow up
-  to a day ahead, red beyond that.
+  to half a day ahead, red beyond that. Half a day is the overnight catch-up: spend one day's
+  share across a 9am-9pm workday and pace peaks at +0.5, then the 12 hours off bring it back to
+  zero. Past +0.5, tomorrow starts in deficit even if you stop now.
 - Claude Code passes the terminal width in `COLUMNS`; without it, or on a narrow window, the
   segment follows the context bar instead. It's absent until the first reply of a session, and
   on API-key billing, which has no plan limits.

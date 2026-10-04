@@ -22,7 +22,8 @@ used_pct=$(echo "$input" | jq -r '
 cache_exp=$(echo "$input" | jq -r 'if .prompt_cache.caching_observed == true then (.prompt_cache.expires_at | if type == "number" then floor else "none" end) else empty end')
 cache_recache=$(echo "$input" | jq -r '.prompt_cache.recache_tokens_if_cold | if type == "number" then floor else empty end')
 # Plan usage (subscription plans only): 5-hour session and 7-day weekly, percent used,
-# rounded; empty when Claude Code has no usage data yet
+# rounded (the weekly figure keeps one decimal when there is one); empty when Claude Code
+# has no usage data yet
 limit_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty | . + 0.5 | floor')
 limit_7d=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty | . + 0.5 | floor')
 reset_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty | floor')
@@ -119,7 +120,9 @@ limit_color() {
 }
 # Weekly pace: how many days of usage ahead of (+) or behind (-) an even spread across
 # the 7-day window (window start = reset time - 7 days). Gray at or under pace, yellow
-# up to 1 day ahead, red beyond that. Printed as "(+0.4 days)".
+# up to half a day ahead, red beyond that. Half a day is the overnight catch-up: spending
+# one day's share across a 9am-9pm workday peaks at +0.5 and the 12 hours off bring it
+# back to 0, so past +0.5 the next day starts in deficit. Printed as "(+0.4 days)".
 pace_segment=""
 if [ -n "$raw_7d" ] && [ -n "$reset_7d" ]; then
   pace_segment=$(awk -v used="$raw_7d" -v reset="$reset_7d" -v now="$(date +%s)" \
@@ -130,7 +133,7 @@ if [ -n "$raw_7d" ] && [ -n "$reset_7d" ]; then
       if (elapsed < 0) elapsed = 0; if (elapsed > 7) elapsed = 7
       d = used / 100 * 7 - elapsed
       s = sprintf("%+.1f", d); if (s == "-0.0") s = "+0.0"
-      color = (d <= 0) ? dim : (d <= 1 ? yellow : red)
+      color = (d <= 0) ? dim : (d <= 0.5 ? yellow : red)
       printf "%s(%s days)", color, s
     }')
 fi
@@ -150,8 +153,11 @@ if [ -n "$limit_5h" ]; then
   fi
 fi
 if [ -n "$limit_7d" ]; then
+  # Weekly percent gets one decimal when Claude Code reports a fraction (as of 2026-10 it
+  # sends whole numbers, so this prints "5%"); the rounded integer still drives the color
+  disp_7d=$(awk -v p="$raw_7d" 'BEGIN { if (p == int(p)) printf "%d", p; else printf "%.1f", p }')
   [ -n "$limits_segment" ] && limits_segment="${limits_segment}${dim} · "
-  limits_segment="${limits_segment}wk $(limit_color "$limit_7d")${limit_7d}%"
+  limits_segment="${limits_segment}wk $(limit_color "$limit_7d")${disp_7d}%"
   [ -n "$pace_segment" ] && limits_segment="${limits_segment} ${pace_segment}"
 fi
 [ -n "$limits_segment" ] && limits_segment="${dim}[${limits_segment}${dim}]${reset}"
