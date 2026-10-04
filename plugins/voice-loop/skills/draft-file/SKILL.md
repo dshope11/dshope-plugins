@@ -98,6 +98,7 @@ GENRE:     <warm-contact email | recruiter reply | founder outreach | cover-lett
 AUDIENCE:  <senior ex-colleague | reference | recruiter | founder / hiring principal | stranger | ...>
 SITUATION: <one line: what is being said, and what has already passed between them>
 SNAPSHOT:  ~/.claude/draft-snapshots/<name>.txt
+MODEL:     <model-id> @ <effort>
 
 WHY I CHANGED IT:
 -
@@ -108,7 +109,8 @@ ALMOST CHANGED BUT DIDN'T:
 
 **Rules for the footer:**
 
-- **Claude fills GENRE, AUDIENCE, SITUATION and SNAPSHOT at write time.** The user should never have to supply what Claude already knows. They fill only the two free-text fields, and even those are optional - a diff with no reason attached is still worth logging.
+- **Claude fills GENRE, AUDIENCE, SITUATION, SNAPSHOT and MODEL at write time.** The user should never have to supply what Claude already knows. They fill only the two free-text fields, and even those are optional - a diff with no reason attached is still worth logging.
+- **MODEL records what wrote the draft**, because how much the user revises depends on the model and effort level as well as on their own rules, and nobody remembers later which drafts came before a model change. The model id is the exact one from the session's environment. The effort level is `$CLAUDE_CODE_EFFORT_LEVEL` if set, otherwise the current model's `effortLevel` in `~/.claude/settings.json` (`jq -r '.modelSettings["<model-id>"].effortLevel // .effortLevel // "default"' ~/.claude/settings.json`). Record the level the draft was **written** at; if it changed between drafting and export, use the drafting level, and write `unknown` rather than guess. **If the draft is rewritten in-session for a later round, append the round instead of replacing the first value:** `claude-opus-5-5 @ high; round 2: claude-opus-5-5 @ xhigh`.
 - **The footer goes at the very bottom, below every paste-able block**, so it can never ride along into a paste.
 - **If the file holds several messages** (e.g. three variants of one note to different recipients), give `WHY I CHANGED IT` one bullet per message, each prefixed with the recipient's name in caps.
 - `ALMOST CHANGED BUT DIDN'T` captures near-misses - phrasings the user considered cutting and kept. These never appear in a diff and are otherwise unrecoverable.

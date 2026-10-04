@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
-  "name": "claude-md-hygiene",
-  "version": "0.1.0",
+  "name": "setup-audit",
+  "version": "0.2.0",
   "description": "Audit a CLAUDE.md for bloat and contradictions, and mine your session transcripts for skills worth building",
   "author": {
     "name": "David Shope",

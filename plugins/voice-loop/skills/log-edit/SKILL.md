@@ -27,6 +27,7 @@ Identical basenames pair them, so the raw diff is `diff ~/.claude/draft-snapshot
 1. **Resolve the pair.**
    - Read the working file. Its footer carries a `SNAPSHOT:` line naming the "before" side; the matching basename in `~/.claude/draft-snapshots/` is the fallback if the line is missing.
    - If there is no snapshot, say so and stop. **Never reconstruct the draft from memory or from conversation scrollback** - a remembered draft is not evidence, and a wrong "before" side makes the entry worse than no entry.
+   - Take the footer's `MODEL:` line for the entry's **Model** field. **If the footer has none, write `not recorded`** - never fill it in from the current session, which may be running a different model or effort than the one that wrote the draft.
    - **Ignore the footer block when diffing.** Everything from the `####` banner down is notes, and the snapshot never contained it; a raw diff will always show the whole footer as an addition. If the footer is the *only* difference, the draft has not been revised - report that and stop without writing an entry.
 
 2. **Prefer the actually-sent text over the edited file, for email.** Users often make a final pass in the mail client, so the sent version is authoritative. Read it with the `sent-mail` entry in the "Claude Code paths" section of the user's CLAUDE.md. **If no `sent-mail` entry exists, skip this step** and use the edited file.
@@ -84,6 +85,7 @@ Identical basenames pair them, so the raw diff is `diff ~/.claude/draft-snapshot
 - **Draft:** `~/.claude/draft-snapshots/YYYY-MM-DD-<slug>.txt`
 - **Final:** `<path>` | Sent Mail ID `<n>`, <date> | not yet sent
 - **Status:** <new pattern | Nth instance of X | promoted to CLAUDE.md YYYY-MM-DD>
+- **Model:** <the footer's MODEL line verbatim, or "not recorded">
 
 ### Edits
 

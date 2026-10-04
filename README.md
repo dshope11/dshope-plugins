@@ -20,7 +20,7 @@ reviews), a job search, and a few code projects.
 |---|---|
 | `git-guards` | `/commit` and `/push` that work from the real diff, plus a hook that blocks fragile heredoc commit messages |
 | `voice-loop` | `/draft-file` exports drafts to clean paste-ready files; `/log-edit` logs how you revised them |
-| `claude-md-hygiene` | `/audit-claude-md` trims a CLAUDE.md; `/mine-transcripts` finds skills worth building in your session history |
+| `setup-audit` | `/audit-claude-md` trims a CLAUDE.md; `/mine-transcripts` finds skills worth building in your session history |
 | `obsidian-guards` | Blocks markdown writes that would break Obsidian rendering |
 
 `obsidian-guards` checks every `.md` write, so install it per project, from inside the vault:

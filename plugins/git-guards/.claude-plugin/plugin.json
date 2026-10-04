@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "git-guards",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Commit and push skills that work from the real diff, plus a hook that blocks fragile heredoc commit messages",
   "author": {
     "name": "David Shope",
