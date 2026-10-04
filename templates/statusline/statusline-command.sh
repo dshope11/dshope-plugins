@@ -21,6 +21,13 @@ used_pct=$(echo "$input" | jq -r '
 # Prompt cache: expiry (epoch s) and tokens a cold cache would re-cache; empty when absent
 cache_exp=$(echo "$input" | jq -r 'if .prompt_cache.caching_observed == true then (.prompt_cache.expires_at | if type == "number" then floor else "none" end) else empty end')
 cache_recache=$(echo "$input" | jq -r '.prompt_cache.recache_tokens_if_cold | if type == "number" then floor else empty end')
+# Plan usage (subscription plans only): 5-hour session and 7-day weekly, percent used,
+# rounded; empty when Claude Code has no usage data yet
+limit_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty | . + 0.5 | floor')
+limit_7d=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty | . + 0.5 | floor')
+reset_5h=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty | floor')
+raw_7d=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+reset_7d=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty | floor')
 
 # Folder: basename of cwd
 folder=$(basename "$cwd")
@@ -100,8 +107,67 @@ if [ -n "$used_pct" ]; then
   ctx_segment="${ctx_segment}]${reset}"
 fi
 
-printf "${lightgray}[${white}%s${lightgray}%s  %s${reset}]" \
-  "$folder" \
-  "$git_info" \
-  "$model"
-printf '%s' "$ctx_segment"
+# Usage-limit segment: [5h pct% (time to reset) · wk pct% (pace)]. Only the percentages
+# and the pace are colored; labels and the reset time stay dim. Percentage thresholds
+# follow the claude.ai usage page (under 75, from 75, from 90), in the same cyan, yellow
+# and red as the context bar. Shows whichever windows were reported.
+limit_color() {
+  if   [ "$1" -ge 90 ]; then printf '%s' "$red"
+  elif [ "$1" -ge 75 ]; then printf '%s' "$yellow"
+  else                       printf '%s' "$cyan"
+  fi
+}
+# Weekly pace: how many days of usage ahead of (+) or behind (-) an even spread across
+# the 7-day window (window start = reset time - 7 days). Gray at or under pace, yellow
+# up to 1 day ahead, red beyond that. Printed as "(+0.4 days)".
+pace_segment=""
+if [ -n "$raw_7d" ] && [ -n "$reset_7d" ]; then
+  pace_segment=$(awk -v used="$raw_7d" -v reset="$reset_7d" -v now="$(date +%s)" \
+    -v dim="$dim" -v yellow="$yellow" -v red="$red" \
+    'BEGIN {
+      week = 7 * 86400
+      elapsed = (now - (reset - week)) / 86400
+      if (elapsed < 0) elapsed = 0; if (elapsed > 7) elapsed = 7
+      d = used / 100 * 7 - elapsed
+      s = sprintf("%+.1f", d); if (s == "-0.0") s = "+0.0"
+      color = (d <= 0) ? dim : (d <= 1 ? yellow : red)
+      printf "%s(%s days)", color, s
+    }')
+fi
+limits_segment=""
+if [ -n "$limit_5h" ]; then
+  limits_segment="${dim}5h $(limit_color "$limit_5h")${limit_5h}%${dim}"
+  if [ -n "$reset_5h" ]; then
+    left=$(( reset_5h - $(date +%s) ))
+    if [ "$left" -gt 0 ]; then
+      mins=$(( (left + 59) / 60 ))
+      if [ "$mins" -ge 60 ]; then
+        limits_segment="${limits_segment} ($(( mins / 60 ))h$(printf '%02d' $(( mins % 60 )))m)"
+      else
+        limits_segment="${limits_segment} (${mins}m)"
+      fi
+    fi
+  fi
+fi
+if [ -n "$limit_7d" ]; then
+  [ -n "$limits_segment" ] && limits_segment="${limits_segment}${dim} · "
+  limits_segment="${limits_segment}wk $(limit_color "$limit_7d")${limit_7d}%"
+  [ -n "$pace_segment" ] && limits_segment="${limits_segment} ${pace_segment}"
+fi
+[ -n "$limits_segment" ] && limits_segment="${dim}[${limits_segment}${dim}]${reset}"
+
+left_part=$(printf "${lightgray}[${white}%s${lightgray}%s  %s${reset}]%s" \
+  "$folder" "$git_info" "$model" "$ctx_segment")
+
+# Right-align the usage segment. Claude Code passes the terminal width in COLUMNS;
+# without it, or when the line is too narrow, the segment follows the context bar.
+visible_len() {
+  printf '%s' "$1" | sed $'s/\033\\[[0-9;]*m//g' | LC_ALL=en_US.UTF-8 wc -m | tr -d ' '
+}
+printf '%s' "$left_part"
+if [ -n "$limits_segment" ]; then
+  margin=4  # Claude Code indents the status line; keep clear of the right edge
+  pad=$(( ${COLUMNS:-0} - $(visible_len "$left_part") - $(visible_len "$limits_segment") - margin ))
+  [ "$pad" -lt 2 ] && pad=1
+  printf '%*s%s' "$pad" '' "$limits_segment"
+fi
