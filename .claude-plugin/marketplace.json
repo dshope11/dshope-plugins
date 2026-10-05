@@ -10,7 +10,7 @@
     {
       "name": "git-guards",
       "description": "Commit and push skills that work from the real diff, plus a hook that blocks fragile heredoc commit messages",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "David Shope",
         "url": "https://github.com/dshope11"
@@ -20,7 +20,7 @@
     {
       "name": "voice-loop",
       "description": "Export drafts to clean paste-ready files, then log how you revised them so Claude learns your voice from your own edits",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "David Shope",
         "url": "https://github.com/dshope11"
@@ -30,7 +30,7 @@
     {
       "name": "setup-audit",
       "description": "Audit a CLAUDE.md for bloat and contradictions, and mine your session transcripts for skills worth building",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "David Shope",
         "url": "https://github.com/dshope11"
@@ -40,7 +40,7 @@
     {
       "name": "obsidian-guards",
       "description": "Block markdown writes containing tokens that break Obsidian rendering (enable it per vault project)",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "David Shope",
         "url": "https://github.com/dshope11"
