@@ -1,6 +1,6 @@
 ---
 name: neetcode
-description: Run one full NeetCode problem cycle interview-style - discuss the approach, gate on a sound solution, then (after the user accepts it on neetcode.io) pull the auto-commit, review the code, and log the solve. Use when the user wants to work a NeetCode problem.
+description: Run one full NeetCode problem cycle interview-style - discuss the approach, gate on a sound solution, then (after the user accepts it on neetcode.io) pull the auto-commit, review the code, and log the solve. Use when the user wants to work a NeetCode problem. Also has a C++ re-solve mode (`/neetcode cpp <problem>`) for C++ interview prep.
 allowed-tools: Bash, Read, Edit, Grep
 ---
 
@@ -9,6 +9,8 @@ Drive one complete problem cycle for Phase B of the DSA prep (see `wiki/topics/c
 **The pattern page is written AFTER the first solve, never before.** If the section is brand new (no `wiki/concepts/<pattern>.md` yet), do **not** create it up front - run this loop on the section's first problem with only the **foundation page** (the "Builds on" column of the Patterns table) in hand, and create the pattern page in Phase 3 (step 12), grounded in the solve that just happened. Rationale on the hub page: a page written up front is abstraction-first (it explains the pattern in the vocabulary of someone who already has it) and it pre-spoils the section's own warm-up problems.
 
 Argument (optional): a problem name or LeetCode number. If omitted, propose the next unsolved problem from the **Problem Plan** in `wiki/topics/coding-interview-prep.md` (Blind-75 first within the current section) and confirm it with the user.
+
+**If the argument starts with `cpp`** (`/neetcode cpp <problem>`), this is a **C++ re-solve**: read the section "C++ re-solve mode" at the bottom first - it overrides specific steps below.
 
 **Interviewer stance (applies to the whole discussion phase):** act like a real interviewer, matching the user's quiz-session style. Probe out loud, push on edges, flag strong talking points. **Do NOT reveal the optimal approach or hand over code** - lead the user there with Socratic questions. Only volunteer a technique the user explicitly asks about (e.g. "how does `Counter` work?"). Confirm complexity and correctness by getting the user to state them, not by stating them for him.
 
@@ -79,6 +81,45 @@ Argument (optional): a problem name or LeetCode number. If omitted, propose the 
     b. **Then offer `/wrap --handoff`** as a single closing action, seeded with whatever was agreed in (a). Phrase it as one offer, not two: `/wrap` runs the checkpoint daily-note logic and commits the vault, and `--handoff` emits a resume prompt whose "what's next" is that agreed problem.
     **Do not offer a bare vault commit here** - `/wrap` already commits, so a separate commit offer just splits the same work into two prompts. The one thing `/wrap` does **not** do is push, so mention `/push` as a separate follow-up if the vault has unpushed commits.
     If the user declines the next problem or wants to stop, still offer `/wrap` (with or without `--handoff` as they prefer) - the session's work needs committing either way.
+
+---
+
+## C++ re-solve mode (`/neetcode cpp <problem>`)
+
+Added 2026-10-05 for a live CoderPad round in C++. The plan, readiness bar, problem list (labels A1-U2), Drill sheet and Rep log are on `wiki/concepts/cpp-for-interviews.md`; the reps run in `~/interview-prep/cpp/` (see its README). The patterns are already known from the Python solves, so the cycle is about **writing them in C++**. Everything above applies except the overrides below.
+
+Three cases:
+- **Known re-solve** - the problem has a curated `.py` in `~/neetcode-submissions/solutions/`. The default.
+- **Unseen** - U1 Time Based Key-Value Store (981) and U2 LRU Cache (146); no `.py` exists.
+- **Re-drill** - the rep already has a `solution.cpp`.
+
+**Phase 0:**
+- Resolve the problem against the page's Plan problem list and note its label.
+- Fetch NeetCode's constraints exactly as in step 3. They matter more in C++ (overflow, `size_t`).
+- Read the problem's curated `.py` and the page's **Drill sheet** instead of the concept page. Unseen: read the section's concept page as usual.
+- If `~/interview-prep/cpp/reps/<LLLL-slug>/` does not exist, write its `PROMPT.md` modeled on `cpp/reps/0001-two-sum/PROMPT.md`: statement, examples, NeetCode constraints, the C++ signature from neetcode.io's C++ starter, and the four-step rep. For list or tree problems add: "define your own `ListNode`/`TreeNode` in `main.cpp` - CoderPad provides none; paste only the class into neetcode.io, which predefines them." Do not commit yet.
+- Run `python cpp/generate.py <LLLL-slug>` from `~/interview-prep` and tell the user the attempt folder.
+
+**Phase 1:**
+- **Known:** the user states the approach in a line or two. Nudge only if it does not come back (the outcome is then `hint`). No Socratic re-derivation. The discussion is about the C++: which container and why, the signature (`const&` vs a copy), overflow and `size_t`, how `main()` will build the input (lists and trees especially), and the trap named in the problem's row of the Plan.
+- **U1: no Phase 1.** Solo and timed from reading `PROMPT.md` to the clean run - this is readiness-bar item 3. The stuck rule is fixed in advance: no approach at 15 minutes -> the user asks for one nudge, outcome `hint`. Stay out until the user reports a clean run or invokes the rule.
+- **U2:** full Phase 1 as in steps 4-6 (it is a design question).
+- **Re-drill:** no Phase 1.
+
+**Phase 2:** the user starts the timer at the blank file (U1: at reading the prompt), writes the class **and** a `main()` in an empty `main.cpp`, and runs `bash ../../run.sh main.cpp` until it is clean. **First solve only:** paste only the class into neetcode.io (C++) and submit. The user reports the minutes.
+
+**Phase 3 (differences from steps 8-17):**
+- **First solve:** pull and find the new file as in steps 8-9 (expect `submission-N.cpp`; on the first C++ rep, confirm the sync writes `.cpp` at all). Also read the user's `main.cpp` in the attempt folder - it is the CoderPad-shaped artifact.
+- **Review** as in steps 10-10a, with C++ conventions in place of the Python ones: explicit includes (no `bits/stdc++.h`); `const&` for read-only inputs; no undefined behavior (out-of-bounds, signed overflow, dangling references or iterators); `size_t`/`int` mixing; `long long` where a sum can overflow; leaked `new`-built nodes in `main()` (CoderPad's ASan may report them - a talking point, not a must-fix). `using namespace std;` is fine in interview code. Keep neetcode.io's signature names; `snake_case` locals; plain ASCII.
+- **Write `~/interview-prep/cpp/reps/<LLLL-slug>/solution.cpp`** (format in `cpp/README.md`): header comment (problem, LC number, label, date, outcome, minutes, `Raw:` pointer); the cleaned solution, active; a "What changed" block; the `main()` with tests so the file runs on its own; Alt 1 = the verbatim accepted submission, commented; one line pointing at the curated `.py` for alternative approaches. **Check it runs:** `bash cpp/run.sh cpp/reps/<LLLL-slug>/solution.cpp`.
+- **No curated copy in `neetcode-submissions/solutions/`** - that tree stays Python-only. Nothing to commit there (the raw zone is auto-synced).
+- **Offer one commit** in `~/interview-prep` covering `PROMPT.md` + `solution.cpp` (message via a temp file and `git commit -F`). Ask first; never commit silently.
+- **Log** a row in the page's `## Rep log` (date, label, problem, minutes, outcome - confirm it with the user, the C++ snag) and set the problem's Status in the Plan list to `done`. **U1/U2 only:** these are first solves of the curriculum, so also add the normal solve-log row on the section's concept page (step 11 - section from the hub's Patterns table: 981 is Binary Search, 146 is Linked List), noting it was solved in C++ and where the code lives, and mark it done in the hub's Problem Plan.
+- **Gotchas:** C++ ones go to the Drill sheet's C++ gotchas table, not the hub's Python table. Step 13's bug-table offer still applies to genuinely general ones.
+- **Skip** step 14 (kata-py promotion) and step 16 (coverage-tracker bump). Step 15 (daily note) as usual.
+- **Step 17:** the next problem is the next must-do in the Plan's order (or the day's row of the Plan's day-by-day).
+
+**Re-drill:** after the clean run, read the attempt's `main.cpp`, compare it with `solution.cpp`, and name the differences that matter (not a raw diff). Log a Rep log row. No submission, and no commit unless `solution.cpp` gained something.
 
 ---
 

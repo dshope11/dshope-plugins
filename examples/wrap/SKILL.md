@@ -71,6 +71,8 @@ For each file, one diff decides whether to mention it:
 diff ~/.claude/draft-snapshots/<name>.txt ~/.claude/drafts/<name>.txt
 ```
 
+A long-form stand-in (its footer has a `WORKING:` line, e.g. a cover letter's `.tex`) is diffed against that path instead: `diff ~/.claude/draft-snapshots/<name>.txt <WORKING path>`. It has no footer on either side, so any difference is real.
+
 - **Only the footer block differs** -> not revised yet. **Say nothing.** An unrevised draft is a normal resting state and may sit for days; nagging about it trains the user to ignore the phase.
 - **Real divergence in the message text** -> revised and never captured. **Name it in one line and offer `/log-edit <name>`.**
 - **No files at top level** -> say nothing.

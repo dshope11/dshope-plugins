@@ -11,12 +11,15 @@ Every period note has two sections written at **different times**:
 
 Outlook is set before the period and Reflection after, so the reflection can honestly measure against intentions. Never generate both in the same pass. Never write a Reflection without first reading the Outlook it is graded against.
 
+Between them sits **`# Plan Changes`**: dated one-line entries logged mid-period when new information changes the plan. It keeps the Outlook as it was written, so the Reflection can grade the period against the original plan and grade each change on its own. See "Plan changes (mid-period)" below.
+
 ## Phases
 
 | Phase | Writes | Reads | Must preserve |
 |-------|--------|-------|---------------|
 | **outlook** | the `# Outlook` section only | previous same-tier Reflection (carry-forward), parent-tier current Outlook, profile/job-search context, (weekly) live TODO backlog | `# Reflection`, `# My Notes`, any `> [!personal]` callouts |
-| **reflection** | the `# Reflection` section only | the existing `# Outlook` (intentions), what actually happened (lower-tier notes + git) | `# Outlook`, `# My Notes`, any `> [!personal]` callouts |
+| **reflection** | the `# Reflection` section only | the existing `# Outlook` (intentions), `# Plan Changes`, what actually happened (lower-tier notes + git) | `# Outlook`, `# Plan Changes`, `# My Notes`, any `> [!personal]` callouts |
+| **plan change** (mid-period, any session) | one appended line in `# Plan Changes` | the `# Outlook` being changed | everything else, **especially `# Outlook`** |
 
 **Preservation is non-negotiable.** A phase edits only its own section. Never overwrite the whole file. Never touch `# My Notes` or `> [!personal]` callouts (same rule as wiki pages - see the vault `CLAUDE.md`). Replace only the content between the section's `#`-level heading and the next `#`-level heading (or EOF).
 
@@ -79,6 +82,16 @@ Date commands are macOS/BSD `date`.
 - **Reflection reads:** this year's quarterly Reflections; fall back to monthlies if missing. If it is not yet December, this is a mid-year review - label it as such.
 - **Reflection subheadings:** `## Biggest Wins`, `## Biggest Growth`, `## Biggest Regret or Missed Opportunity`, `## How This Year Changed My Direction`, `## One Line Summary`, `## Quarter by Quarter`.
 
+## Plan changes (mid-period)
+
+When new information changes a period's plan (a round gets scheduled, a deadline moves, a block of work slips by a day), log it in `# Plan Changes` and **leave `# Outlook` alone**. Before this section existed, changes were appended inside the Outlook, so the Reflection couldn't tell the original plan from the revised one. (Added 2026-10-05, after a newly scheduled interview round rearranged a week's plan.)
+
+- **One dated line per change:** `- **Mon 10/05 - <trigger>:** <what changed>; displaces <what it pushes out>.` Add `Bar reset: <how>` only when the change alters what gets graded.
+- **Empty is normal.** Never prompt to fill it, and never log routine day-to-day shuffling within the schedule's own backups. That's what the backup column is for.
+- **Only with the user's agreement.** A plan change is a decision, so propose it and log it once agreed.
+- **Mirror dated triggers** into the entity page and tracker row in the same pass, as outlook step 5 requires.
+- A note created before 2026-10-05 has no heading: insert `# Plan Changes` immediately above `# Reflection`.
+
 ---
 
 ## OUTLOOK workflow (any tier)
@@ -99,6 +112,7 @@ Date commands are macOS/BSD `date`.
 2. Read the note file and extract the existing `# Outlook`. If there is none, say so and reflect on the period as observed.
 3. Gather what actually happened per the tier's "Reflection reads".
 4. Draft the `# Reflection` with the tier's subheadings, grading explicitly against the Outlook (what was done, what slipped and why, what to carry). Include your honest assessment.
+   - **Plan changes are graded separately.** Grade the bar against the original Outlook unless a change logged a `Bar reset`. Then give each `# Plan Changes` entry a short verdict: was the change the right call given what happened afterward, and did the displaced work recover? A slip that was a deliberate, logged change reads differently from one that just happened, so say which each slip was.
    - **Timeline section, always last** (`## Day by Day` / `## Week by Week` / `## Month by Month` / `## Quarter by Quarter`): one bullet per sub-period in chronological order, `- **<label>** - <the main things that happened>`, built from the same lower-tier notes the reflection already reads (no extra reads). Labels: `Mon 9/28`, `W40 (9/28-10/4)`, `September`, `Q3`. Facts only - the assessment lives in the sections above. Include sub-periods with nothing logged (`- **Sun 10/4** - nothing logged`) so a gap reads as a gap, not an omission. A sub-period that hasn't ended yet (reflection written early) is marked `(planned: ...)` rather than filled in. (Added 2026-10-03.)
 5. **Verify before presenting.** Check every date, count, quote and status claim in the draft against its source - the lower-tier note, the entity page, the tracker row, git - not against memory or an earlier summary. **A claim inherited from an earlier reflection gets re-checked at its source**, because errors propagate down the tiers (W39's "four hours" reached September's draft before it was caught). Quotation marks are for verbatim text only; mark paraphrase as paraphrase. Keep categories consistent across the notes in one run (e.g. a recruiter screen is not an interview with a hiring team). (Added 2026-10-03: an xhigh final pass found nine errors in four already-approved notes - wrong counts and dates, a quoted paraphrase, a miscategorized screen, contradictions between notes.)
 6. Show the draft, get confirmation, then write **only** the `# Reflection` section.

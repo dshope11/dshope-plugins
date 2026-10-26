@@ -16,6 +16,7 @@ Capture the difference between a draft Claude wrote and the version the user act
 |---|---|
 | `~/.claude/drafts/<name>.txt` | the working file the user edited - the "after" side |
 | `~/.claude/draft-snapshots/<name>.txt` | the pristine draft as Claude wrote it - the "before" side |
+| `~/.claude/drafts/<name>.txt` with a `WORKING:` line | a long-form stand-in from `/draft-file`: footer only; the "after" side is the source file it names |
 | `~/.claude/drafts/logged/`, `~/.claude/draft-snapshots/logged/` | pairs already captured, moved here by step 7 |
 
 Identical basenames pair them, so the raw diff is `diff ~/.claude/draft-snapshots/<name>.txt ~/.claude/drafts/<name>.txt`.
@@ -27,6 +28,7 @@ Identical basenames pair them, so the raw diff is `diff ~/.claude/draft-snapshot
 1. **Resolve the pair.**
    - Read the working file. Its footer carries a `SNAPSHOT:` line naming the "before" side; the matching basename in `~/.claude/draft-snapshots/` is the fallback if the line is missing.
    - If there is no snapshot, say so and stop. **Never reconstruct the draft from memory or from conversation scrollback** - a remembered draft is not evidence, and a wrong "before" side makes the entry worse than no entry.
+   - **Long-form stand-in:** if the footer has a `WORKING:` line, the "after" side is the file at that path (e.g. a cover letter's `.tex`), not the stand-in. Diff the snapshot against it whole; neither side carries a footer. The size-control rule applies (changed passages only), and the entry's `Final:` names the source path plus the commit that holds the sent version, if there is one. Step 7 retires the stand-in and the snapshot; the source stays where it is.
    - Take the footer's `MODEL:` line for the entry's **Model** field. **If the footer has none, write `not recorded`** - never fill it in from the current session, which may be running a different model or effort than the one that wrote the draft.
    - **Ignore the footer block when diffing.** Everything from the `####` banner down is notes, and the snapshot never contained it; a raw diff will always show the whole footer as an addition. If the footer is the *only* difference, the draft has not been revised - report that and stop without writing an entry. **If it was also sent as drafted** (the user says so, or the step 2 send matches the draft), **retire the pair anyway (step 7)**: nothing is left to capture, and a pair left at the top level would read as a revision still waiting. If it hasn't been sent yet, leave it in the queue - the user may still revise it.
 

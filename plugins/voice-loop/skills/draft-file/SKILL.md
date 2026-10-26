@@ -1,6 +1,6 @@
 ---
 name: draft-file
-description: Write text drafted in the conversation to a clean .txt file and open it in an editor. Use when a draft the user will paste or send (an email, a message, an application answer) is ready to leave the chat. Voice artifacts go to ~/.claude/drafts with a pristine snapshot for /log-edit; scratch goes to /tmp. Paste-able output is ASCII with single-line paragraphs.
+description: Write text drafted in the conversation to a clean .txt file and open it in an editor. Use when a draft the user will paste or send (an email, a message, an application answer) is ready to leave the chat. Voice artifacts go to ~/.claude/drafts with a pristine snapshot for /log-edit; scratch goes to /tmp. Paste-able output is ASCII with single-line paragraphs. Long-form mode snapshots a source file the user edits in place (a cover letter's .tex) without exporting it.
 allowed-tools: Bash, Write
 ---
 
@@ -48,6 +48,25 @@ Export a piece of text drafted together in the current conversation into a clean
 
 ---
 
+## Long-form mode - a source file the user edits in place
+
+For a voice artifact that already lives in a source file the user will edit where it is - a cover letter's `.tex` in an application folder - **don't export the text.** The source stays the working file; this mode only creates the pair. Steps 3 and 5 above don't apply (nobody pastes a `.tex`), and step 1b still does.
+
+1. **Snapshot the source as-is**, with no ASCII or line-joining pass:
+   ```bash
+   mkdir -p ~/.claude/drafts/logged ~/.claude/draft-snapshots/logged
+   cp <source> ~/.claude/draft-snapshots/YYYY-MM-DD-<slug>.txt
+   ```
+   The `.txt` name keeps the basename identical to the stand-in's. The re-snapshot rule below still holds: never overwrite an existing snapshot of that name.
+2. **Write a stand-in** at `~/.claude/drafts/YYYY-MM-DD-<slug>.txt` holding **only the footer**, with one extra line under `SNAPSHOT:`, `WORKING:   <absolute path to the source>`. The stand-in keeps the draft in the queue that `/wrap` lists and gives the user somewhere to write the WHY fields; `/log-edit` diffs the snapshot against the `WORKING:` path, not against the stand-in.
+3. Open the source and the stand-in, and confirm with both paths.
+
+**Snapshot the version the user receives** - after Claude's own build-and-trim passes, not before - so the diff holds only the user's changes. **Skip this mode when the user wrote the first draft**: there's no Claude draft to compare against.
+
+*(Added 2026-10-22. A cover letter was drafted straight into its `.tex` and revised there by the user, and the revision couldn't be logged: no snapshot existed, and `/log-edit` won't reconstruct one from the conversation.)*
+
+---
+
 ## Retrieval before export
 
 **The log is only worth keeping if it is read before writing, not just appended to after.** This step makes past revisions operative without encoding any of them as a rule in `CLAUDE.md` - which is the point: a pattern seen twice in one batch is not yet a rule, but it is already evidence, and evidence is usable the moment it is retrievable.
@@ -81,6 +100,7 @@ Users revise nearly every draft before sending, and those revisions are the best
 |---|---|
 | `~/.claude/drafts/<name>.txt` | the working file the user edits - **this is what gets opened in the editor** |
 | `~/.claude/draft-snapshots/<name>.txt` | the pristine draft as Claude wrote it |
+| `~/.claude/drafts/<name>.txt` with a `WORKING:` line | a long-form stand-in: footer only; the working file is the source it names |
 | `~/.claude/drafts/logged/`, `~/.claude/draft-snapshots/logged/` | pairs already captured into the log, moved there by `/log-edit` |
 
 So **anything sitting at the top level of `~/.claude/drafts/` is a draft whose revision has not been captured yet.** Both halves survive a reboot, a session restart, and an arbitrarily long gap between drafting and sending.
@@ -110,7 +130,7 @@ ALMOST CHANGED BUT DIDN'T:
 **Rules for the footer:**
 
 - **Claude fills GENRE, AUDIENCE, SITUATION, SNAPSHOT and MODEL at write time.** The user should never have to supply what Claude already knows. They fill only the two free-text fields, and even those are optional - a diff with no reason attached is still worth logging.
-- **MODEL records what wrote the draft**, because how much the user revises depends on the model and effort level as well as on their own rules, and nobody remembers later which drafts came before a model change. The model id is the exact one from the session's environment. The effort level is `$CLAUDE_CODE_EFFORT_LEVEL` if set, otherwise the current model's `effortLevel` in `~/.claude/settings.json` (`jq -r '.modelSettings["<model-id>"].effortLevel // .effortLevel // "default"' ~/.claude/settings.json`). Record the level the draft was **written** at; if it changed between drafting and export, use the drafting level, and write `unknown` rather than guess. **If the draft is rewritten in-session for a later round, append the round instead of replacing the first value:** `claude-opus-5-5 @ high; round 2: claude-opus-5-5 @ xhigh`.
+- **MODEL records what wrote the draft**, because how much the user revises depends on the model and effort level as well as on their own rules, and nobody remembers later which drafts came before a model change. The model id is the exact one from the session's environment. The effort level is `$CLAUDE_EFFORT`, the live session level the status line shows; `~/.claude/settings.json` holds only the saved default, which a session started at another level doesn't change, so don't compare against it. If `$CLAUDE_EFFORT` is unset, ask rather than guess. Record the level the draft was **written** at; if it changed between drafting and export, use the drafting level, and write `unknown` rather than guess. **If the draft is rewritten in-session for a later round, append the round instead of replacing the first value:** `claude-opus-5-5 @ high; round 2: claude-opus-5-5 @ xhigh`.
 - **The footer goes at the very bottom, below every paste-able block**, so it can never ride along into a paste.
 - **If the file holds several messages** (e.g. three variants of one note to different recipients), give `WHY I CHANGED IT` one bullet per message, each prefixed with the recipient's name in caps.
 - `ALMOST CHANGED BUT DIDN'T` captures near-misses - phrasings the user considered cutting and kept. These never appear in a diff and are otherwise unrecoverable.

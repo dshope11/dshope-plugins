@@ -27,7 +27,7 @@ Start-of-day preparation for the vault's daily notes. Rules only; the incident b
 
 `/sod` runs in its own session, so read generously, but **cover each source once**: never read the same text twice.
 
-**(a) Outlooks, the plan.** Compute the week (`date +%G-W%V`), month (`date +%Y-%m`), calendar quarter (`YYYY-Qn`, Jan-Mar = Q1) and year. Read the `# Outlook` of each that exists in `Weekly Notes/`, `Monthly Notes/`, `Quarterly Notes/` and `Yearly Notes/`. Tier definitions are in `.claude/skills/horizons/periodic-workflow.md`.
+**(a) Outlooks, the plan.** Compute the week (`date +%G-W%V`), month (`date +%Y-%m`), calendar quarter (`YYYY-Qn`, Jan-Mar = Q1) and year. Read the `# Outlook` of each that exists in `Weekly Notes/`, `Monthly Notes/`, `Quarterly Notes/` and `Yearly Notes/`, **plus its `# Plan Changes` section if non-empty - a logged change overrides the Outlook's schedule from its date on.** Tier definitions are in `.claude/skills/horizons/periodic-workflow.md`.
 
 **(b) Progress, what actually happened.** An Outlook is set once and goes stale mid-period, so gather actual progress through the rollup hierarchy:
 - **This week:** this ISO week's daily notes from Monday through the day before TODAY. Read only their activity sections (`## Morning` / `## Afternoon` / `## Evening`, with `### wiki activity`), stopping at `# TODO`: `awk '/^# TODO/{exit} {print}' "<note>"`. The backlog below it is already in context and repeats from note to note. The source note from section 2 was read in full already; don't read it again.
@@ -72,18 +72,29 @@ The span answers "what's new?", not "has the awaited thing arrived?". **Never co
 - outbound messages named in the last few daily notes with no logged reply;
 - anything the session handoff or today's carried TODOs flag as blocked on someone else.
 
-**Search each item** with `himalaya envelope list --page-size 20 -- "<query>"`, and compare the newest hit's date with what the wiki records:
+**Search each item, bounded and all at once.** A search with no date bound scans the whole mailbox, and the server takes 15-60 s to answer each one. A bounded search takes 1-2 s.
+- **Bound each item at its own thread, not at the watermark:** `after <date> and body <term>`, where the date is the **day before the last inbound the vault records for that thread**. `after` is strict and date-granular, and the server counts days in the account's time zone, so the day before includes the recorded day. A thread with no recorded inbound is bounded at its first outbound (the send or submission date); an item with no recorded date at all gets 30 days. **The watermark is the wrong bound:** this search exists to catch what envelope triage misread in an earlier span (a platform relay looks like bulk at the envelope line), so it must reach back past the last sweep to the thread's own last known message.
+- **Run every query in one call** through `search_awaited.sh` in this folder: one query per line on stdin, 8 at a time, results printed in input order with each search's time.
+
+  ```bash
+  printf '%s\n' "after 2026-10-09 and body acme" "after 2026-10-09 and from jsmith" \
+    "after 2026-10-24 and from hit-reply" | .claude/skills/sod/search_awaited.sh
+  ```
+
+  **himalaya answers a malformed query with an empty table, not an error** (`fromm acme`, `bodyy acme`, an impossible date, a multi-word pattern), so the script checks each query's grammar first and prints `SEARCH FAILED` for one that doesn't parse, or one whose search errored. Report a failed search as failed, never as "none".
+
+Then compare the newest hit's date with what the wiki records:
 - `body <company-or-product>` first: it's the most reliable key. Then `subject <term>` and `from <name-or-domain>`.
 - **Search the company or product name, never only a person's name.** Platform relays (YC/WaaS, Greenhouse, Ashby, Lever) send from the platform, so a person-name miss is not evidence of absence.
 - **`from` matches whole words, not substrings.** Search a whole token (`linkedin`, `hit-reply`, `greenhouse`); a fragment returns an empty table that looks exactly like a real absence.
 - **The inbox holds only one side of each thread.** Replies the user sends inside LinkedIn, WaaS, or an ATS portal never reach this mailbox, so mail can show what arrived but never whether a reply went out. Never infer inaction from mail.
 
-**Two standing LinkedIn queries, run every sweep:**
+**Two standing LinkedIn queries, run every sweep** in the same call. These two are identical every run, so every earlier sweep already searched the mail before its own watermark: bound them at **the day before the span start**, and carry the last known hit forward from the previous watermark line ("nothing since `<name> <date>`").
 - `from hit-reply`: recruiter InMail. It arrives from LinkedIn's `hit-reply` / `inmail-hit-reply` addresses, with the recruiter's real name in the From display and their own subject, so no template matches it (the word "InMail" appears only in the body). Replies on a thread arrive as `Message replied: <original subject>`. Connection invitations come through here too. This is the main recruiter-inbound channel.
 - `from messaging-digest`: ordinary LinkedIn direct messages, as `<Name> just messaged you`. **The message body is not in the email**, only the sender's name, their title, and a link. Report each hit as "needs LinkedIn opened manually; the body is not in the mail", naming the sender and title. Never report one as read or triaged, and never guess its content.
 
 **Reconstruct both sides before reporting any watch-list item.** What the user needs is whose turn it is, not whether mail arrived:
-1. **Last inbound:** the newest mail hit, with its date.
+1. **Last inbound:** the newest mail hit, with its date. With no hit since the bound, it's the inbound the vault already records.
 2. **Last outbound:** from the vault, never from mail. Check the entity page's thread-of-record section, then the thread file if the entity page links one, then the daily notes since the last inbound.
 3. **Whose turn:** outbound newer than inbound means waiting on them; inbound newer means the user owes a reply.
 4. **Days elapsed** since the newer of the two, plus any offered window that has now lapsed.
@@ -102,7 +113,7 @@ A finding that is only reported disappears when the session ends. Fix the pages 
 
 **Walk outward from the thread, in this order:**
 1. **The entity page, first; it's authoritative.** `wiki/entities/<company-or-person>.md`: a dated section with the verbatim message (or its substantive part), what it settles, what it doesn't settle, and the resulting status. Bump `updated`. If the contact is live and has no page, create one.
-2. **The tracker row, in the same pass:** status, Next-action, Last-action date, notes.
+2. **The tracker row, in the same pass:** status, Next-action, Last-action date, notes. **Then the listings-store event, if the message moves the process a stage:** a `screen` or `interview` offered, an `offer`, a `rejected`, or a `closed` req. Rules, dating and the `store_events.py` commands are in `.claude/store-events.md`; use `--origin "sod TODAY"` and the Gmail ID as `--evidence`. An acknowledgment or a scheduling email moves no stage. If the listing isn't in the store, say so in the log entry. A store failure is a loud briefing line, never a stop.
 3. **Retire any dated trigger the message answers, in both the entity page and the row.** Strike it and say in the text that it's retired and must not fire, with one line on why. A trigger that's merely deleted looks like an oversight to the next reader.
 4. **Promote the evergreen finding.** Ask what the message establishes beyond this one company (a channel result, a corrected self-assessment, a pattern across contacts, a durable background fact) and put it in `[[topics/career-story-bank]]` or `wiki/profile.md`, with the entity page referencing it. This step is skipped most often and compounds most.
 5. **`wiki/log.md`:** one `## [YYYY-MM-DD] query | ...` entry naming what arrived, what it closed, and every page touched.
@@ -118,7 +129,7 @@ Append one line to the `# Misc.` section of today's note, below anything already
 *Inbox swept through YYYY-MM-DD HH:MM TZ (`/sod`). Awaited: <item> - none since <date>; <item> - none.*
 ```
 
-Use the real local time (`date "+%Y-%m-%d %H:%M %Z"`). **Write it on every run without exception**: when the sweep found nothing, when everything was bulk, and when the rest of `/sod` is cut short. It's the other half of the coverage rule in 4a. If the sweep was partial (span truncated, a query failed, himalaya errored), record the point actually reached and say what wasn't covered.
+**The time is when the last envelope listing ran, not when the line is written.** Capture it in the same command as that listing (`date "+%Y-%m-%d %H:%M %Z"; himalaya envelope list ...`) and stamp that. Mail arriving between the listing and the write was never seen, and a write-time stamp claims it as swept. If a later listing in the same run reads further, use its time instead. **Write it on every run without exception**: when the sweep found nothing, when everything was bulk, and when the rest of `/sod` is cut short. It's the other half of the coverage rule in 4a. If the sweep was partial (span truncated, a query failed, himalaya errored), record the point actually reached and say what wasn't covered.
 
 ## 5. Open the note
 
